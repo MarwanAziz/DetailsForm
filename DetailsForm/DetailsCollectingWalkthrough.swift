@@ -65,30 +65,32 @@ struct DetailsCollectingWalkthrough: View {
             }
             .padding()
             .ignoresSafeArea(.keyboard)
-                        .onReceive(Publishers.keyboardHeight.receive(on: DispatchQueue.main)) { value in
-                            var newHeight: CGFloat = 0
-                            if value.height > 0 {
-                                if let focusedFieldFrame = viewModel.focusedFieldFrame {
-                                    print("field frame: \(focusedFieldFrame)")
-                                    print("Keyboard frame: \(value)")
-                                    print("Frames intersects: \(focusedFieldFrame.intersects(value))")
-                                    if focusedFieldFrame.intersects(value) {
-                                        newHeight = focusedFieldFrame.intersection(value).height //(reader.frame(in: .global).maxY  - value) - totalFieldBottomAnchor
-                                        print("frames intersection: \(focusedFieldFrame.intersection(value))")
-                                        print("*****************************************************")
-                                        if newHeight < 0 {
-                                            newHeight = 0
-                                        }
-                                    }
-                                } else {
-                                    print("Field frame is null")
-                                    return
-                                }
-                            }
-                            withAnimation {
-                                self.bottomAnchor = abs(newHeight)
+            .onKeyboardSizeChanged(action: { value in
+                var newHeight: CGFloat = 0
+                if value.height > 0 {
+                    if let focusedFieldFrame = viewModel.focusedFieldFrame {
+                        print("field frame: \(focusedFieldFrame)")
+                        print("Keyboard frame: \(value)")
+                        print("Frames intersects: \(focusedFieldFrame.intersects(value))")
+                        if focusedFieldFrame.maxY > value.minY {
+                            newHeight = focusedFieldFrame.maxY - value.minY
+                            print("frames intersection: \(focusedFieldFrame.intersection(value))")
+                            if newHeight < 0 {
+                                newHeight = 0
                             }
                         }
+                    } else {
+                        print("Field frame is null")
+                        return
+                    }
+                } else {
+                    print("Hiding keyboard: \(value)")
+                }
+                print("*****************************************************")
+                withAnimation {
+                    self.bottomAnchor = abs(newHeight)
+                }
+            })
             .frame(height: reader.size.height)
 
         }
@@ -106,28 +108,31 @@ struct DetailsCollectingWalkthrough_Previews: PreviewProvider {
     }
 }
 
-extension Notification {
-    var keyboardHeight: CGRect {
-        return (userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect) ?? .zero
+
+struct WatchKeyboard: ViewModifier {
+    @State var keyboardSize: CGRect = .zero
+    var onSizeChanged: (CGRect) -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear(perform: {
+                NotificationCenter.Publisher(center: NotificationCenter.default, name: UIResponder.keyboardWillShowNotification)
+                    .dropFirst(1)
+                    .receive(on: DispatchQueue.main)
+                    .merge(with: NotificationCenter.Publisher(center: NotificationCenter.default, name: UIResponder.keyboardWillHideNotification))
+                    .compactMap { notification in
+                        notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+                    }.subscribe(Subscribers.Assign(object: self, keyPath: \.keyboardSize))
+
+            }
+            ).onChange(of: keyboardSize) {
+                onSizeChanged($0)
+            }
     }
 }
 
-extension Publishers {
-    // 1.
-    static var keyboardHeight: AnyPublisher<CGRect, Never> {
-        // 2.
-        let willShow = NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)
-            .map {
-                $0.keyboardHeight
-            }
-
-        let willHide = NotificationCenter.default.publisher(for: UIApplication.keyboardWillHideNotification)
-            .map { _ in
-                    CGRect.zero
-            }
-
-        // 3.
-        return MergeMany(willShow, willHide)
-            .eraseToAnyPublisher()
+extension View {
+    func onKeyboardSizeChanged( action: @escaping (CGRect) -> Void) -> some View {
+        return modifier(WatchKeyboard(onSizeChanged: action))
     }
 }

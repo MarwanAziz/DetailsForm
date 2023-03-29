@@ -22,21 +22,19 @@ struct DetailsCollectionStepTwo: View {
                 viewModel.focusedFieldFrame = frame
             })
             Spacer()
-            TextField("", text: $address2)
-            InputField(tag: 0, type: .text, title: "Address line two", text: $address1, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
+            InputField(tag: 1, type: .text, title: "Address line two", text: $address1, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
                 viewModel.focusedFieldFrame = frame
             })
             Spacer()
-            InputField(tag: 0, type: .text, title: "City", text: $address1, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
+            InputField(tag: 2, type: .text, title: "City", text: $address1, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
                 viewModel.focusedFieldFrame = frame
             })
             Spacer()
-            InputField(tag: 0, type: .text, title: "Country", text: $address1, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
+            InputField(tag: 3, type: .text, title: "Country", text: $address1, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
                 viewModel.focusedFieldFrame = frame
             })
             Spacer()
         }
-        .textFieldStyle(.roundedBorder)
         .padding(.horizontal)
     }
 }

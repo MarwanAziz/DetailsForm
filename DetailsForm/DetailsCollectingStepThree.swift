@@ -18,24 +18,20 @@ struct DetailsCollectingStepThree: View {
 
     var body: some View {
         VStack {
-            TextField("Height", text: $height)
             Spacer()
-                .onTapGesture {
-
-                }
             InputField(tag: 0, type: .number, title: "Height", text: $height, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
                 viewModel.focusedFieldFrame = frame
             })
-            InputField(tag: 0, type: .number, title: "Weight", text: $height, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
+            InputField(tag: 1, type: .number, title: "Weight", text: $height, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
                 viewModel.focusedFieldFrame = frame
             })
             Spacer()
-            InputField(tag: 0, type: .number, title: "Age", text: $height, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
+            InputField(tag: 2, type: .number, title: "Age", text: $height, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
                 viewModel.focusedFieldFrame = frame
             })
             Spacer()
 
-            InputField(tag: 0, type: .number, title: "Number of daily steps", text: $height, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
+            InputField(tag: 3, type: .number, title: "Number of daily steps", text: $height, enabled: .constant(true), focused: $focusedField, onFocus: { _, frame  in
                 viewModel.focusedFieldFrame = frame
             })
             Spacer()
